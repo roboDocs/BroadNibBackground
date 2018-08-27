@@ -3,8 +3,9 @@ from defconAppKit.windows.baseWindow import BaseWindowController
 from fontTools.pens.basePen import BasePen
 from mojo.extensions import getExtensionDefault, setExtensionDefault, getExtensionDefaultColor, setExtensionDefaultColor
 from mojo.events import addObserver, removeObserver
+from mojo.roboFont import CurrentFont
 from mojo.UI import UpdateCurrentGlyphView
-from mojo.drawingTools import *
+import mojo.drawingTools as ctx
 from vanilla import *
 
 def getPointsOnCurve(n, p0, p1, p2, p3):
@@ -55,7 +56,7 @@ def getPointsOnLine(n, p0, p1):
 
 class BroadNibPen(BasePen):
     
-    def __init__(self, glyphSet, step, width, height, angle, shape):
+    def __init__(self, glyphSet, step, width, height, angle, shape, ctx=ctx):
         BasePen.__init__(self, glyphSet)
         self.step = step
         self.width = width
@@ -63,6 +64,7 @@ class BroadNibPen(BasePen):
         self.angle = angle
         self.shape = shape
         self.firstPoint = None
+        self.ctx = ctx
 
     def _moveTo(self, pt):
         self.firstPoint = pt
@@ -85,12 +87,12 @@ class BroadNibPen(BasePen):
     def _drawPoints(self, points):
         for point in points:
             x, y = point
-            save()
-            translate(x, y)
-            rotate(self.angle)
-            translate(-self.width/2, -self.height/2)
+            self.ctx.save()
+            self.ctx.translate(x, y)
+            self.ctx.rotate(self.angle)
+            self.ctx.translate(-self.width/2, -self.height/2)
             self.shape(0, 0, self.width, self.height)
-            restore()
+            self.ctx.restore()
         
 
 class SliderGroup(Group):
@@ -261,5 +263,6 @@ class BroadNibBackground(BaseWindowController):
         glyph.draw(self.currentPen)
              
         
-        
-BroadNibBackground()
+if __name__ == '__main__':
+
+    BroadNibBackground()
